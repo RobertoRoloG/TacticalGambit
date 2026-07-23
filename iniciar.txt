@@ -1,0 +1,6 @@
+# COMANDO DE INICIO LOCAL (En este entorno de desarrollo):
+$java = "C:\Users\usuario\.antigravity-ide\extensions\redhat.java-1.55.0-win32-x64\jre\21.0.11-win32-x86_64\bin\java.exe"
+&$java -cp "target/classes;src/main/resources" com.tacticalgambit.web.WebLauncher
+
+# COMANDO UNIVERSAL (Para cualquier usuario en GitHub con Maven):
+mvn compile exec:java

@@ -1,0 +1,13 @@
+# Compilación y empaquetado
+target/
+*.class
+
+# IDEs y editores
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Logs
+*.log

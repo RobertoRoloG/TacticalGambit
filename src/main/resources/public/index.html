@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Gambit - Web Client</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="game-container">
+        <!-- Columna Izquierda: Tablero y Mano de Cartas -->
+        <div class="main-column">
+            <!-- Sección del Tablero -->
+            <div class="board-section">
+                <canvas id="gameBoard" width="520" height="520"></canvas>
+                <div id="gameOverOverlay" class="game-over-overlay" style="display: none;">
+                    <div class="game-over-content">
+                        <h2 id="gameOverTitle">FIN DE LA PARTIDA</h2>
+                        <p id="gameOverMessage"></p>
+                        <button id="overlayResetBtn" class="btn btn-primary">Reiniciar Partida</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de la Mano de Cartas (Debajo del tablero, con Deck aislado) -->
+            <div class="hand-section">
+                <div class="hand-header">
+                    <span class="section-label">Mano de Cartas</span>
+                    <span id="handStatus"></span>
+                </div>
+                <div class="hand-row">
+                    <!-- Baraja aislada visualmente de la mano -->
+                    <div class="deck-area">
+                        <div class="deck-indicator" id="deckIndicator">
+                            <div class="deck-stack">
+                                <img src="/assets/card_back.png" alt="Baraja" class="deck-image" />
+                            </div>
+                            <div class="deck-info">
+                                <div class="deck-count" id="deckCount">20</div>
+                                <div class="deck-label">Baraja</div>
+                            </div>
+                        </div>
+                        <button id="drawBtn" class="btn-draw-deck-img" title="Robar Carta (Coste: 1 💎)">
+                            <img src="/assets/draw_button.png" alt="Robar (1 💎)" />
+                        </button>
+                    </div>
+                    
+                    <!-- Divisor visual vertical -->
+                    <div class="hand-divider"></div>
+                    
+                    <!-- Lista de cartas jugables -->
+                    <div id="cardsList" class="cards-list">
+                        <div class="card-item empty-hand" style="border: 1px dashed rgba(43,34,26,0.15); justify-content: center; align-items: center; background: none;">
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Mano vacía</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-panel">
+            <div class="sidebar-inner-frame">
+                <div class="sidebar-header">
+                    <h1 class="header-title">TACTICAL GAMBIT</h1>
+                    <button id="resetBtn" class="btn-reset" title="Reiniciar Partida">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Detalles de la Partida -->
+                <div class="game-info">
+                    <div class="info-row">
+                        <span class="info-label">Turno de</span>
+                        <span id="activePlayerVal" class="info-value val-white">BLANCO</span>
+                    </div>
+                    <div class="info-row" id="apCard">
+                        <span class="info-label">Puntos de Acción</span>
+                        <span id="apVal" class="info-value">3 / 5</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Mov. Físico</span>
+                        <span id="moveStatusVal" class="info-value">
+                            <span class="move-badge pending">Disponible</span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Estado</span>
+                        <span id="gameStateVal" class="info-value val-amber">En Curso</span>
+                    </div>
+                </div>
+
+                <!-- Controles en la parte de la barra lateral -->
+                <div class="sidebar-controls">
+                    <button id="passBtn" class="btn btn-primary">
+                        <span>Terminar Turno</span>
+                    </button>
+                </div>
+
+                <!-- Registro de Jugadas (Log) al pie, con altura máxima fija y scroll interno -->
+                <div class="log-section">
+                    <div class="log-title">Registro de Acciones</div>
+                    <div id="actionLogVal" class="log-body">Partida inicializada.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor para notificaciones de error -->
+    <div id="notifications" class="notification-container"></div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
