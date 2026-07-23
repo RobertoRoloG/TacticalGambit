@@ -909,3 +909,105 @@ canvas:hover {
     color: var(--accent-terracotta);
     border: 1px solid rgba(194, 65, 12, 0.2);
 }
+
+/* Overlay de Coronación (Promotion) */
+.promotion-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(43, 34, 26, 0.55);
+    backdrop-filter: blur(4px);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 105;
+    animation: fadeIn 0.25s ease forwards;
+}
+
+.promotion-content {
+    background: #4a3227; /* Madera oscura */
+    border: 2.5px solid #281a13;
+    border-radius: 14px;
+    padding: 5px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+    width: 320px;
+    max-width: 90%;
+}
+
+.promotion-inner {
+    background: radial-gradient(circle, #fdfcf7 0%, #f6efe2 100%); /* Pergamino */
+    border: 1px solid rgba(43, 34, 26, 0.15);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.promotion-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #2b221a;
+    letter-spacing: 1.5px;
+    margin: 0;
+}
+
+.promotion-options {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+/* Botones de opción de coronación (como fichas de ajedrez premium) */
+.promo-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 2.2px solid;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+    padding: 0;
+    line-height: 1;
+}
+
+/* Ficha blanca de promoción */
+.promo-btn.promo-white {
+    background: radial-gradient(circle, #ffffff 0%, #f3ece4 100%);
+    border-color: rgba(43, 34, 26, 0.15);
+    color: #2b221a;
+}
+
+.promo-btn.promo-white:hover {
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent-forest);
+}
+
+/* Ficha negra de promoción */
+.promo-btn.promo-black {
+    background: radial-gradient(circle, #5a4b41 0%, #2b201a 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fdfbf7;
+}
+
+.promo-btn.promo-black:hover {
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+    border-color: var(--accent-terracotta);
+}
+
+.promo-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

@@ -474,25 +474,31 @@ canvas.addEventListener("click", (e) => {
                     drawBoard();
                     return;
                 }
-                // Ask for optional promotion if one of the pieces is a Pawn going to back rank
+                // Check if card action promotes a Pawn
                 const p1 = gameState.board[cardTargetSquare1];
                 const p2 = gameState.board[coord];
-                let promo = null;
-                if ((p1 && p1.type === "PAWN" && ((p1.color === "WHITE" && rank === 7) || (p1.color === "BLACK" && rank === 0))) ||
-                    (p2 && p2.type === "PAWN" && ((p2.color === "WHITE" && cardTargetSquare1.endsWith("8")) || (p2.color === "BLACK" && cardTargetSquare1.endsWith("1"))))) {
-                    const choice = prompt("Promotion detected. Enter promotion piece (Q: Queen, R: Rook, B: Bishop, N: Knight):", "Q");
-                    if (choice) {
-                        promo = choice.toUpperCase();
-                    }
-                }
+                const activeColor = gameState.activePlayer;
+                const isP1PawnPromo = p1 && p1.type === "PAWN" && ((p1.color === "WHITE" && rank === 7) || (p1.color === "BLACK" && rank === 0));
+                const isP2PawnPromo = p2 && p2.type === "PAWN" && ((p2.color === "WHITE" && cardTargetSquare1.endsWith("8")) || (p2.color === "BLACK" && cardTargetSquare1.endsWith("1")));
 
-                sendAction({
-                    type: "PLAY_CARD",
-                    cardIndex: selectedCardIndex,
-                    targetSquare: cardTargetSquare1,
-                    targetSquare2: coord,
-                    promoType: promo
-                });
+                if (isP1PawnPromo || isP2PawnPromo) {
+                    showPromotionModal(activeColor, (promo) => {
+                        sendAction({
+                            type: "PLAY_CARD",
+                            cardIndex: selectedCardIndex,
+                            targetSquare: cardTargetSquare1,
+                            targetSquare2: coord,
+                            promoType: promo
+                        });
+                    });
+                } else {
+                    sendAction({
+                        type: "PLAY_CARD",
+                        cardIndex: selectedCardIndex,
+                        targetSquare: cardTargetSquare1,
+                        targetSquare2: coord
+                    });
+                }
             }
         } else {
             // Carta de 1 objetivo
@@ -520,22 +526,24 @@ canvas.addEventListener("click", (e) => {
                 currentState = "NEUTRAL";
                 drawBoard();
             } else {
-                // Si la pieza que se mueve es Peón y va a la fila extrema, preguntar promoción
+                // If physical piece is a Pawn moving to back rank, show promotion modal
                 const piece = gameState.board[selectedSquare];
-                let promo = null;
                 if (piece && piece.type === "PAWN" && ((piece.color === "WHITE" && rank === 7) || (piece.color === "BLACK" && rank === 0))) {
-                    const choice = prompt("Promote your Pawn. Choose a piece (Q: Queen, R: Rook, B: Bishop, N: Knight):", "Q");
-                    if (choice) {
-                        promo = choice.toUpperCase();
-                    }
+                    showPromotionModal(piece.color, (promo) => {
+                        sendAction({
+                            type: "MOVE",
+                            from: selectedSquare,
+                            to: coord,
+                            promoType: promo
+                        });
+                    });
+                } else {
+                    sendAction({
+                        type: "MOVE",
+                        from: selectedSquare,
+                        to: coord
+                    });
                 }
-
-                sendAction({
-                    type: "MOVE",
-                    from: selectedSquare,
-                    to: coord,
-                    promoType: promo
-                });
             }
         }
     }
@@ -822,4 +830,36 @@ function drawPieceSymbol(ctx, type, isWhite, cx, cy, size) {
     }
 
     ctx.restore();
+}
+
+// Muestra el modal de coronación interactivo con fichas estilizadas
+function showPromotionModal(playerColor, callback) {
+    const overlay = document.getElementById("promotionOverlay");
+    const optionsContainer = document.getElementById("promotionOptions");
+    
+    // Limpiar opciones previas
+    optionsContainer.innerHTML = "";
+    
+    const isWhite = playerColor === "WHITE";
+    const promoClass = isWhite ? "promo-white" : "promo-black";
+    const pieces = [
+        { type: "Q", glyph: isWhite ? "♕" : "♛", title: "Queen" },
+        { type: "R", glyph: isWhite ? "♖" : "♜", title: "Rook" },
+        { type: "B", glyph: isWhite ? "♗" : "♝", title: "Bishop" },
+        { type: "N", glyph: isWhite ? "♘" : "♞", title: "Knight" }
+    ];
+    
+    pieces.forEach(p => {
+        const btn = document.createElement("button");
+        btn.className = `promo-btn ${promoClass}`;
+        btn.innerHTML = p.glyph;
+        btn.title = p.title;
+        btn.addEventListener("click", () => {
+            overlay.style.display = "none";
+            callback(p.type);
+        });
+        optionsContainer.appendChild(btn);
+    });
+    
+    overlay.style.display = "flex";
 }
