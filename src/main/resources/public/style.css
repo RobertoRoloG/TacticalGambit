@@ -697,9 +697,10 @@ canvas:hover {
 
 /* Historial de jugadas (Log) */
 .log-section {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    height: 160px;
+    min-height: 0;
 }
 
 .log-title {
@@ -713,6 +714,7 @@ canvas:hover {
 
 .log-body {
     flex: 1;
+    min-height: 0;
     background: #f5ede0; /* Fondo pergamino más oscuro para el log */
     border: 1.5px solid rgba(43, 34, 26, 0.15);
     border-radius: 8px;
