@@ -19,7 +19,7 @@ public class GameWebSocketServer {
     private static final int PORT = 7070;
     private static final Set<ClientHandler> clients = ConcurrentHashMap.newKeySet();
     private static TurnState gameState = MatchInitializer.initialize();
-    private static final List<String> actionLogs = new CopyOnWriteArrayList<>(Collections.singletonList("Partida inicializada."));
+    private static final List<String> actionLogs = new CopyOnWriteArrayList<>(Collections.singletonList("Match initialized."));
 
     public static void start() {
         new Thread(() -> {
@@ -286,12 +286,12 @@ public class GameWebSocketServer {
             try {
                 ActionCommandDTO cmd = ActionCommandDTO.parseJson(text);
                 if (cmd == null || cmd.type() == null) {
-                    sendError("Comando JSON no reconocido o inválido.");
+                    sendError("Unrecognized or invalid JSON command.");
                     return;
                 }
 
                 if (gameState.gameState() != com.tacticalgambit.core.state.GameState.IN_PROGRESS && !"RESET".equals(cmd.type())) {
-                    sendError("La partida ha finalizado. Por favor, pulse reiniciar.");
+                    sendError("The match has ended. Please click reset.");
                     return;
                 }
 
@@ -306,28 +306,28 @@ public class GameWebSocketServer {
                                 case "R" -> com.tacticalgambit.core.domain.PieceType.ROOK;
                                 case "B" -> com.tacticalgambit.core.domain.PieceType.BISHOP;
                                 case "N" -> com.tacticalgambit.core.domain.PieceType.KNIGHT;
-                                default -> throw new IllegalArgumentException("Pieza de coronación inválida.");
+                                default -> throw new IllegalArgumentException("Invalid promotion piece.");
                             };
                         }
                         PieceMoveAction action = new PieceMoveAction(from, to, promo);
                         if (action.isValid(gameState)) {
                             action.execute(gameState);
-                            actionLogs.add("Movimiento: " + cmd.from() + " -> " + cmd.to());
+                            actionLogs.add("Move: " + cmd.from() + " -> " + cmd.to());
                             broadcastState();
                         } else {
                             if (gameState.hasMovedPieceThisTurn()) {
-                                sendError("Ya se ha realizado un movimiento de pieza en este turno.");
+                                sendError("A piece movement has already been made this turn.");
                             } else if (!gameState.actionPoints().canAfford(PieceMoveAction.MOVE_AP_COST)) {
-                                sendError("AP insuficiente para realizar esta acción (se requieren 2 AP).");
+                                sendError("Insufficient AP to perform this action (2 AP required).");
                             } else {
-                                sendError("Movimiento ilegal.");
+                                sendError("Illegal move.");
                             }
                         }
                     }
                     case "PLAY_CARD" -> {
                         int idx = cmd.cardIndex();
                         if (idx < 0 || idx >= gameState.playerHand().size()) {
-                            sendError("Índice de carta fuera de rango.");
+                            sendError("Card index out of range.");
                             return;
                         }
                         Card card = gameState.playerHand().cards().get(idx);
@@ -335,70 +335,70 @@ public class GameWebSocketServer {
                         CardPlayAction action = new CardPlayAction(card, target);
                         if (action.isValid(gameState)) {
                             action.execute(gameState);
-                            actionLogs.add("Carta jugada: " + card.name());
+                            actionLogs.add("Card played: " + card.name());
                             broadcastState();
                         } else {
                             if (!gameState.actionPoints().canAfford(card.apCost())) {
-                                sendError("AP insuficiente para realizar esta acción (se requieren " + card.apCost() + " AP).");
+                                sendError("Insufficient AP to perform this action (" + card.apCost() + " AP required).");
                             } else {
-                                sendError("No se cumplen las condiciones para jugar esta carta.");
+                                sendError("Conditions to play this card are not met.");
                             }
                         }
                     }
                     case "DISCARD_CARD" -> {
                         int idx = cmd.cardIndex();
                         if (idx < 0 || idx >= gameState.playerHand().size()) {
-                            sendError("Índice de carta fuera de rango.");
+                            sendError("Card index out of range.");
                             return;
                         }
                         Card card = gameState.playerHand().cards().get(idx);
                         DiscardCardAction action = new DiscardCardAction(card);
                         if (action.isValid(gameState)) {
                             action.execute(gameState);
-                            actionLogs.add("Carta descartada: " + card.name());
+                            actionLogs.add("Card discarded: " + card.name());
                             broadcastState();
                         } else {
-                            sendError("No es válido descartar esta carta.");
+                            sendError("Discarding this card is invalid.");
                         }
                     }
                     case "DRAW" -> {
                         DrawCardAction action = new DrawCardAction();
                         if (action.isValid(gameState)) {
                             action.execute(gameState);
-                            actionLogs.add("Robó una carta del mazo.");
+                            actionLogs.add("Drew a card from the deck.");
                             broadcastState();
                         } else {
                             if (!gameState.actionPoints().canAfford(1)) {
-                                sendError("AP insuficiente para realizar esta acción (se requiere 1 AP).");
+                                sendError("Insufficient AP to perform this action (1 AP required).");
                             } else if (gameState.playerHand().size() >= 4) {
-                                sendError("No se puede robar: mano llena (límite de 4 cartas).");
+                                sendError("Cannot draw: hand full (limit of 4 cards).");
                             } else {
-                                sendError("No se puede robar carta.");
+                                sendError("Cannot draw card.");
                             }
                         }
                     }
                     case "END_TURN" -> {
                         if (com.tacticalgambit.core.domain.GameConditionChecker.isInCheck(gameState.board(), gameState.activePlayer())) {
                             gameState.setGameState(com.tacticalgambit.core.state.GameState.CHECKMATE);
-                            actionLogs.add("¡Jaque Mate! El jugador " + (gameState.activePlayer() == com.tacticalgambit.core.domain.PieceColor.WHITE ? "BLANCO" : "NEGRO") + " no pudo salvar a su Rey. Ganador: " + (gameState.activePlayer() == com.tacticalgambit.core.domain.PieceColor.WHITE ? "NEGRO" : "BLANCO") + ".");
+                            actionLogs.add("Checkmate! " + (gameState.activePlayer() == com.tacticalgambit.core.domain.PieceColor.WHITE ? "WHITE" : "BLACK") + " player could not save their King. Winner: " + (gameState.activePlayer() == com.tacticalgambit.core.domain.PieceColor.WHITE ? "BLACK" : "WHITE") + ".");
                         } else {
                             gameState.startNextTurn();
-                            actionLogs.add("Turno finalizado. Juega " + (gameState.activePlayer() == com.tacticalgambit.core.domain.PieceColor.WHITE ? "BLANCO" : "NEGRO"));
+                            actionLogs.add("Turn ended. " + (gameState.activePlayer() == com.tacticalgambit.core.domain.PieceColor.WHITE ? "WHITE" : "BLACK") + "'s turn.");
                         }
                         broadcastState();
                     }
                     case "RESET" -> {
                         gameState = MatchInitializer.initialize();
                         actionLogs.clear();
-                        actionLogs.add("Partida reiniciada.");
+                        actionLogs.add("Match reset.");
                         broadcastState();
                     }
                     default -> sendError("Comando desconocido: " + cmd.type());
                 }
             } catch (IllegalArgumentException | IllegalStateException e) {
-                sendError("Error de regla: " + e.getMessage());
+                sendError("Rule error: " + e.getMessage());
             } catch (Exception e) {
-                sendError("Error inesperado: " + e.getMessage());
+                sendError("Unexpected error: " + e.getMessage());
             }
         }
 
@@ -413,7 +413,7 @@ public class GameWebSocketServer {
                         case "R" -> com.tacticalgambit.core.domain.PieceType.ROOK;
                         case "B" -> com.tacticalgambit.core.domain.PieceType.BISHOP;
                         case "N" -> com.tacticalgambit.core.domain.PieceType.KNIGHT;
-                        default -> throw new IllegalArgumentException("Pieza de coronación inválida.");
+                        default -> throw new IllegalArgumentException("Invalid promotion piece.");
                     });
                 }
                 return new DoublePieceTarget(s1, s2, promo);

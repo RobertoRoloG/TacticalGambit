@@ -24,14 +24,14 @@ const PIECE_GLYPHS = {
 };
 
 const CARD_DESCRIPTIONS = {
-    "Side Step": "Mueve un Peón aliado 1 casilla horizontal.",
-    "Cycle Hand": "Descarta esta carta y roba 2 cartas.",
-    "Tactical Dash": "Mueve pieza propia (no Rey/Peón) 1 casilla.",
-    "Shield": "Escuda pieza aliada (no Rey) por 1 turno.",
-    "Tactical Jump": "Permite saltar a una pieza aliada por 1 turno.",
-    "Regroup": "Intercambia 2 piezas aliadas a dist. <= 3 (1 Peón).",
-    "Barricade": "Bloquea una casilla vacía durante 2 turnos.",
-    "Overcharge": "+2 💎 ahora. -2 💎 en tu siguiente turno."
+    "Side Step": "Move an allied Pawn 1 square horizontally.",
+    "Cycle Hand": "Discard this card and draw 2 cards.",
+    "Tactical Dash": "Move own piece (not King/Pawn) 1 square.",
+    "Shield": "Shield allied piece (not King) for 1 turn.",
+    "Tactical Jump": "Allow jumping over an allied piece for 1 turn.",
+    "Regroup": "Swap 2 allied pieces at dist. <= 3 (1 Pawn max).",
+    "Barricade": "Block an empty square for 2 turns.",
+    "Overcharge": "+2 💎 now. -2 💎 on your next turn."
 };
 
 // Conectar por WebSocket al backend
@@ -231,7 +231,7 @@ function updateUI() {
 
     // Jugador activo
     const activePlayerEl = document.getElementById("activePlayerVal");
-    activePlayerEl.innerText = gameState.activePlayer === "WHITE" ? "BLANCO" : "NEGRO";
+    activePlayerEl.innerText = gameState.activePlayer === "WHITE" ? "WHITE" : "BLACK";
     activePlayerEl.className = "info-value " + (gameState.activePlayer === "WHITE" ? "val-white" : "val-black");
 
     // AP
@@ -241,9 +241,9 @@ function updateUI() {
     const moveStatusEl = document.getElementById("moveStatusVal");
     if (moveStatusEl) {
         if (gameState.hasMovedPiece) {
-            moveStatusEl.innerHTML = `<span class="move-badge completed">Realizado</span>`;
+            moveStatusEl.innerHTML = `<span class="move-badge completed">Done</span>`;
         } else {
-            moveStatusEl.innerHTML = `<span class="move-badge pending">Disponible</span>`;
+            moveStatusEl.innerHTML = `<span class="move-badge pending">Available</span>`;
         }
     }
 
@@ -254,24 +254,24 @@ function updateUI() {
     const overlayMsg = document.getElementById("gameOverMessage");
 
     if (gameState.gameState === "CHECKMATE") {
-        stateVal.innerText = `JAQUE MATE (Ganador: ${gameState.activePlayer === "WHITE" ? "NEGRO" : "BLANCO"})`;
+        stateVal.innerText = `CHECKMATE (Winner: ${gameState.activePlayer === "WHITE" ? "BLACK" : "WHITE"})`;
         stateVal.style.color = "var(--accent-red)";
         
-        const winner = gameState.activePlayer === "WHITE" ? "NEGRO" : "BLANCO";
-        overlayTitle.innerText = "¡JAQUE MATE!";
+        const winner = gameState.activePlayer === "WHITE" ? "BLACK" : "WHITE";
+        overlayTitle.innerText = "CHECKMATE!";
         overlayTitle.style.color = "var(--accent-terracotta)";
-        overlayMsg.innerHTML = `Fin de la partida.<br>El ganador es el jugador <strong>${winner}</strong>.`;
+        overlayMsg.innerHTML = `Game over.<br>The winner is the <strong>${winner}</strong> player.`;
         overlay.style.display = "flex";
     } else if (gameState.gameState === "STALEMATE") {
-        stateVal.innerText = "TABLAS POR AHOGADO";
+        stateVal.innerText = "STALEMATE";
         stateVal.style.color = "var(--accent-gold)";
         
-        overlayTitle.innerText = "¡TABLAS!";
+        overlayTitle.innerText = "STALEMATE!";
         overlayTitle.style.color = "var(--accent-amber)";
-        overlayMsg.innerHTML = "Fin de la partida.<br>Tablas por ahogado.";
+        overlayMsg.innerHTML = "Game over.<br>Stalemate.";
         overlay.style.display = "flex";
     } else {
-        stateVal.innerText = gameState.isInCheck ? "¡REY EN JAQUE!" : "En Curso";
+        stateVal.innerText = gameState.isInCheck ? "KING IN CHECK!" : "In Progress";
         stateVal.style.color = gameState.isInCheck ? "var(--accent-red)" : "var(--accent-cyan)";
         overlay.style.display = "none";
     }
@@ -290,7 +290,7 @@ function updateUI() {
     if (gameState.hand.length === 0) {
         cardsListEl.innerHTML = `
             <div class="card-item empty-hand" style="border: 1px dashed rgba(43,34,26,0.15); justify-content: center; align-items: center; background: none;">
-                <span style="color: var(--text-muted); font-size: 0.85rem;">Mano vacía</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">Empty hand</span>
             </div>`;
     } else {
         gameState.hand.forEach((card, index) => {
@@ -361,7 +361,7 @@ function updateUI() {
                     
                     <div class="card-body-wrapper">
                         <p class="card-desc">${CARD_DESCRIPTIONS[card.name] || ""}</p>
-                        <div class="card-help">Clic Izq: Apuntar | Clic Der: Descartar</div>
+                        <div class="card-help">L-Click: Target | R-Click: Discard</div>
                     </div>
                 </div>
             `;
@@ -386,9 +386,9 @@ function updateUI() {
                         cardTargetSquare1 = null;
                         currentState = "CARD_TARGETING";
                         if (card.name === "Regroup" || card.name === "Side Step" || card.name === "Tactical Dash") {
-                            showNotification(`Carta ${card.name} seleccionada. Seleccione la pieza de origen.`, "info");
+                            showNotification(`Card ${card.name} selected. Choose source piece.`, "info");
                         } else {
-                            showNotification(`Carta ${card.name} seleccionada. Haga clic en su objetivo en el tablero.`, "info");
+                            showNotification(`Card ${card.name} selected. Click target on the board.`, "info");
                         }
                     }
                     updateUI();
@@ -457,16 +457,16 @@ canvas.addEventListener("click", (e) => {
             if (cardTargetSquare1 === null) {
                 cardTargetSquare1 = coord;
                 if (card.name === "Side Step") {
-                    showNotification("Peón seleccionado. Seleccione la casilla horizontal vacía adyacente.");
+                    showNotification("Pawn selected. Choose adjacent empty horizontal square.");
                 } else if (card.name === "Tactical Dash") {
-                    showNotification("Pieza seleccionada. Seleccione la casilla vacía adyacente en cualquier dirección.");
+                    showNotification("Piece selected. Choose adjacent empty square in any direction.");
                 } else {
-                    showNotification("Primer objetivo seleccionado. Haga clic en el segundo objetivo.");
+                    showNotification("First target selected. Click on the second target.");
                 }
                 drawBoard();
             } else {
                 if (cardTargetSquare1 === coord) {
-                    // Clic en la misma pieza origen cancela la selección de objetivos
+                    // Click on same source piece cancels target selection
                     cardTargetSquare1 = null;
                     selectedCardIndex = null;
                     currentState = "NEUTRAL";
@@ -474,13 +474,13 @@ canvas.addEventListener("click", (e) => {
                     drawBoard();
                     return;
                 }
-                // Preguntar por coronación opcional si uno de las piezas es Peón y va a la fila extrema
+                // Ask for optional promotion if one of the pieces is a Pawn going to back rank
                 const p1 = gameState.board[cardTargetSquare1];
                 const p2 = gameState.board[coord];
                 let promo = null;
                 if ((p1 && p1.type === "PAWN" && ((p1.color === "WHITE" && rank === 7) || (p1.color === "BLACK" && rank === 0))) ||
                     (p2 && p2.type === "PAWN" && ((p2.color === "WHITE" && cardTargetSquare1.endsWith("8")) || (p2.color === "BLACK" && cardTargetSquare1.endsWith("1"))))) {
-                    const choice = prompt("Coronación detectada. Ingrese pieza de coronación (Q: Dama, R: Torre, B: Alfil, N: Caballo):", "Q");
+                    const choice = prompt("Promotion detected. Enter promotion piece (Q: Queen, R: Rook, B: Bishop, N: Knight):", "Q");
                     if (choice) {
                         promo = choice.toUpperCase();
                     }
@@ -524,7 +524,7 @@ canvas.addEventListener("click", (e) => {
                 const piece = gameState.board[selectedSquare];
                 let promo = null;
                 if (piece && piece.type === "PAWN" && ((piece.color === "WHITE" && rank === 7) || (piece.color === "BLACK" && rank === 0))) {
-                    const choice = prompt("Corone su Peón. Elija una pieza (Q: Dama, R: Torre, B: Alfil, N: Caballo):", "Q");
+                    const choice = prompt("Promote your Pawn. Choose a piece (Q: Queen, R: Rook, B: Bishop, N: Knight):", "Q");
                     if (choice) {
                         promo = choice.toUpperCase();
                     }
@@ -546,7 +546,7 @@ function sendAction(actionObj) {
     if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(actionObj));
     } else {
-        showNotification("No hay conexión con el servidor de juego.");
+        showNotification("No connection to the game server.");
     }
 }
 
@@ -560,7 +560,7 @@ document.getElementById("passBtn").addEventListener("click", () => {
 });
 
 document.getElementById("resetBtn").addEventListener("click", () => {
-    if (confirm("¿Está seguro de reiniciar la partida?")) {
+    if (confirm("Are you sure you want to restart the match?")) {
         sendAction({ type: "RESET" });
     }
 });
@@ -587,7 +587,7 @@ function cancelActiveInteraction() {
         selectedCardIndex = null;
         cardTargetSquare1 = null;
         currentState = "NEUTRAL";
-        showNotification("Interacción cancelada.", "info");
+        showNotification("Interaction cancelled.", "info");
         updateUI();
         drawBoard();
     }

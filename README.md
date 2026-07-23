@@ -1,56 +1,56 @@
 # Tactical Gambit
 
-Tactical Gambit es un juego web interactivo que combina ajedrez clásico con mecánicas de cartas tácticas y puntos de acción (AP).
+Tactical Gambit is an interactive web-based game that combines classic chess with tactical card mechanics and action points (AP).
 
-## Requisitos
+## Requirements
 
-- **Java Development Kit (JDK) 21** o superior instalado en el sistema.
-- **Apache Maven** instalado (opcional, pero altamente recomendado para ejecución desde terminal).
+- **Java Development Kit (JDK) 21** or higher installed on your system.
+- **Apache Maven** installed (optional, but highly recommended for command line execution).
 
-## Cómo Compilar y Ejecutar
+## How to Compile and Run
 
-### Método 1: Usando Maven (Recomendado y Universal)
+### Method 1: Using Maven (Recommended & Universal)
 
-Si tienes Maven instalado y en el PATH del sistema, puedes compilar e iniciar el servidor con un solo comando desde la raíz del proyecto:
+If you have Maven installed and added to your system's PATH, you can compile and start the server with a single command from the project root:
 
 ```bash
 mvn compile exec:java
 ```
 
-Una vez iniciado el servidor, abre tu navegador web en:
+Once the server is running, open your web browser and navigate to:
 👉 **[http://localhost:7070](http://localhost:7070)**
 
 ---
 
-### Método 2: Importar en un IDE (IntelliJ IDEA / VS Code / Eclipse)
+### Method 2: Import into an IDE (IntelliJ IDEA / VS Code / Eclipse)
 
-1. Abre tu IDE de preferencia.
-2. Importa la carpeta del proyecto como un **proyecto Maven** (`pom.xml`).
-3. Busca la clase principal: `com.tacticalgambit.web.WebLauncher` en la ruta `src/main/java/com/tacticalgambit/web/WebLauncher.java`.
-4. Haz clic derecho sobre la clase y selecciona **Run** (Ejecutar).
+1. Open your preferred IDE.
+2. Import the project folder as a **Maven project** (using `pom.xml`).
+3. Locate the main class: `com.tacticalgambit.web.WebLauncher` located under `src/main/java/com/tacticalgambit/web/WebLauncher.java`.
+4. Right-click on the class and select **Run**.
 
 ---
 
-### Método 3: Compilar y Ejecutar Manualmente desde Terminal (sin Maven instalado en PATH)
+### Method 3: Compile and Run Manually from Terminal (without Maven in PATH)
 
-Si tienes JDK instalado pero no tienes Maven configurado en tu variable de entorno PATH, puedes ejecutar el script adecuado para compilar e iniciar directamente:
+If you have the JDK installed but do not have Maven configured in your PATH environment variable, you can execute the appropriate commands to compile and start the application directly:
 
-#### En Windows (PowerShell):
+#### On Windows (PowerShell):
 ```powershell
-# Compilar
+# Compile
 javac -d target/classes -sourcepath src/main/java (Get-ChildItem -Recurse -Filter *.java src/main/java).FullName
 
-# Ejecutar
+# Run
 java -cp "target/classes;src/main/resources" com.tacticalgambit.web.WebLauncher
 ```
 
-#### En Linux / macOS:
+#### On Linux / macOS:
 ```bash
-# Compilar
+# Compile
 find src/main/java -name "*.java" > sources.txt
 javac -d target/classes -sourcepath src/main/java @sources.txt
 rm sources.txt
 
-# Ejecutar
+# Run
 java -cp "target/classes:src/main/resources" com.tacticalgambit.web.WebLauncher
 ```
