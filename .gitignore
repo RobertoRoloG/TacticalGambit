@@ -11,3 +11,6 @@ target/
 
 # Logs
 *.log
+
+# Herramientas locales de desarrollo
+.tools/
